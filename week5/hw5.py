@@ -8,6 +8,7 @@
 
 import cs112_s19_week5_linter
 import copy
+import math
 
 #####################################
 # COLLABORATIVE Non-Animation Problems
@@ -25,10 +26,9 @@ def destructiveRemoveRowAndCol(lst, row, col):
     for i in range(len(lst)):
         lst[i].pop(col)
     lst.pop(row)
-    return lst 
+    return lst
 
 def bestQuiz(a):
-    
     # resolve ties in favor of the lower quiz number.
     avg = 0
     for i in range(len(a[0])):
@@ -41,7 +41,6 @@ def bestQuiz(a):
         if ((sum_col/count)>avg):
             avg = sum_col/count
             index = i
-            
     return index
 
 #####################################
@@ -50,19 +49,43 @@ def bestQuiz(a):
 #####################################
 
 def areLegalValues(a):
-    return False
+    for i in range(len(a)):
+        # Check all values are once
+        if (a.count(i+1)) > 1:
+            return False
+        # Check all values are legal
+        if a[i] > len(a) or a[i] < 0:
+            return False
+    return True
 
 def isLegalRow(board, row):
-    return False
+    return areLegalValues(board[row])
 
 def isLegalCol(board, col):
-    return False
+    return areLegalValues([i[col] for i in board])
 
 def isLegalBlock(board, block):
-    return False
+    vals = [] 
+    
+    N = int(math.sqrt(len(board)))
+    row = (block//N)*N
+    col = (block%N)*N
+    
+    for i in range(row, row+N):
+        vals+=board[i][col:col+N]
+    return areLegalValues(vals)
 
 def isLegalSudoku(board):
-    return False 
+    
+    for i in range(len(board)):
+        if(isLegalRow(board,i)==False):
+            return False
+        elif(isLegalCol(board,i)==False):
+            return False
+        elif(isLegalBlock(board,i)==False):
+            return False
+
+    return True 
 
 #################################################
 # ignore_rest: The autograder will not look at 
@@ -133,7 +156,7 @@ def runSudoku(width=300, height=300):
 #################################################
 
 def testNondestructiveRemoveRowAndCol():
-    print("Testing testNondestructiveRemoveRowAndCol()...", end="")
+    print("Testing nondestructiveRemoveRowAndCol()...", end="")
     lst = [ [ 2, 3, 4, 5],
         [ 8, 7, 6, 5],
         [ 0, 1, 2, 3] ]
@@ -145,7 +168,7 @@ def testNondestructiveRemoveRowAndCol():
     print("Passed!")
 
 def testDestructiveRemoveRowAndCol():
-    print("Testing testDestructiveRemoveRowAndCol()...", end="")
+    print("Testing destructiveRemoveRowAndCol()...", end="")
     # The input list and output list
     lst = [ [ 2, 3, 4, 5],
             [ 8, 7, 6, 5],
@@ -158,26 +181,88 @@ def testDestructiveRemoveRowAndCol():
     print("Passed!")
 
 def testBestQuiz():
-    print("Testing testDestructiveRemoveRowAndCol()...", end="")
+    print("Testing destructiveRemoveRowAndCol()...", end="")
     a = [[ 88,  80, 91 ],
          [ 68, 100, -1 ]]
     assert(bestQuiz(a) == 2)
     print("Passed!")
 
 def testAreLegalValues():
-    print("Write your own tests for areLegalValues!")
+    print("Testing areLegalValues()...", end="")
+    assert(areLegalValues([1,2,0,0,4,6,0,0,8]) == True)
+    assert(areLegalValues([1,2,0,0,4,6,0,7,8]) == True)
+    assert(areLegalValues([1,2,0,0,4,6,0,0,10]) == False)
+    assert(areLegalValues([1,2,0,0,4,6,0,0,-1]) == False)
+    assert(areLegalValues([1,2,0,1,4,6,0,0,3]) == False)
+    print("Passed!")
 
 def testIsLegalRow():
-    print("Write your own tests for isLegalRow!")
+    print("Testing isLegalRow()...", end="")
+    board = [[ 5, 3, 0, 0, 7, 0, 0, 0, 0 ],
+            [ 6, 0, 0, 1, 9, 5, 0, 0, 0 ],
+            [ 0, 9, 8, 0, 0, 0, 0, 6, 0 ],
+            [ 8, 0, 0, 0, 6, 0, 0, 0, 3 ],
+            [ 4, 0, 0, 8, 0, 3, 0, 0, 1 ],
+            [ 7, 0, 0, 0, 2, 0, 0, 0, 6 ],
+            [ 0, 6, 0, 0, 0, 0, 2, 8, 0 ],
+            [ 0, 0, 0, 4, 1, 9, 0, 0, 5 ],
+            [ 0, 0, 0, 0, 8, 0, 0, 7, 9 ]]
+    assert(isLegalRow(board, 0) == True)
+    assert(isLegalRow(board, 1) == True)
+    assert(isLegalRow(board, 2) == True)
+    assert(isLegalRow(board, 3) == True)
+    assert(isLegalRow(board, 4) == True)
+    print("Passed!")
 
 def testIsLegalCol():
-    print("Write your own tests for isLegalCol!")
+    print("Testing isLegalCol()...", end="")
+    board = [[ 5, 3, 0, 0, 7, 0, 0, 0, 0 ],
+            [ 6, 0, 0, 1, 9, 5, 0, 0, 0 ],
+            [ 0, 9, 8, 0, 0, 0, 0, 6, 0 ],
+            [ 8, 0, 0, 0, 6, 0, 0, 0, 3 ],
+            [ 4, 0, 0, 8, 0, 3, 0, 0, 1 ],
+            [ 7, 0, 0, 0, 2, 0, 0, 0, 6 ],
+            [ 0, 6, 0, 0, 0, 0, 2, 8, 0 ],
+            [ 0, 0, 0, 4, 1, 9, 0, 0, 5 ],
+            [ 0, 0, 0, 0, 8, 0, 0, 7, 9 ]]
+    assert(isLegalCol(board, 0) == True)
+    assert(isLegalCol(board, 1) == True)
+    assert(isLegalCol(board, 2) == True)
+    assert(isLegalCol(board, 3) == True)
+    assert(isLegalCol(board, 4) == True)
+    print("Passed!")
 
 def testIsLegalBlock():
-    print("Write your own tests for isLegalBlock!")
+    print("Testing isLegalBlock()...", end="")
+    board = [[ 5, 3, 0, 0, 7, 0, 0, 0, 0 ],
+            [ 6, 0, 0, 1, 9, 5, 0, 0, 0 ],
+            [ 0, 9, 8, 0, 0, 0, 0, 6, 0 ],
+            [ 8, 0, 0, 0, 6, 0, 0, 0, 3 ],
+            [ 4, 0, 0, 8, 0, 3, 0, 0, 1 ],
+            [ 7, 0, 0, 0, 2, 0, 0, 0, 6 ],
+            [ 0, 6, 0, 0, 0, 0, 2, 8, 0 ],
+            [ 0, 0, 0, 4, 1, 9, 0, 0, 5 ],
+            [ 0, 0, 0, 0, 8, 0, 0, 7, 9 ]]
+    assert(isLegalBlock(board, 0) == True)
+    assert(isLegalBlock(board, 1) == True)
+    assert(isLegalBlock(board, 2) == True)
+    assert(isLegalBlock(board, 3) == True)
+    assert(isLegalBlock(board, 4) == True)
+    print("Passed!")
 
 def testIsLegalSudoku():
-    print("Write your own tests for isLegalSudoku!")
+    print("Testing isLegalSudoku()...", end="")
+    board = [[ 5, 3, 0, 0, 7, 0, 0, 0, 0 ],
+            [ 6, 0, 0, 1, 9, 5, 0, 0, 0 ],
+            [ 0, 9, 8, 0, 0, 0, 0, 6, 0 ],
+            [ 8, 0, 0, 0, 6, 0, 0, 0, 3 ],
+            [ 4, 0, 0, 8, 0, 3, 0, 0, 1 ],
+            [ 7, 0, 0, 0, 2, 0, 0, 0, 6 ],
+            [ 0, 6, 0, 0, 0, 0, 2, 8, 0 ],
+            [ 0, 0, 0, 4, 1, 9, 0, 0, 5 ],
+            [ 0, 0, 0, 0, 8, 0, 0, 7, 9 ]]
+    assert(isLegalSudoku(board) == True)
+    print("Passed!")
 
 def testSudokuAnimation():
     print("Running Sudoku Animation...", end="")
@@ -191,12 +276,12 @@ def testAll():
     testNondestructiveRemoveRowAndCol()
     testDestructiveRemoveRowAndCol()
     testBestQuiz()
-    # testAreLegalValues()
-    # testIsLegalRow()
-    # testIsLegalCol()
-    # testIsLegalBlock()
-    # testIsLegalSudoku()
-    # testSudokuAnimation()
+    testAreLegalValues()
+    testIsLegalRow()
+    testIsLegalCol()
+    testIsLegalBlock()
+    testIsLegalSudoku()
+    testSudokuAnimation()
 
 def main():
     cs112_s19_week5_linter.lint() # check rules
