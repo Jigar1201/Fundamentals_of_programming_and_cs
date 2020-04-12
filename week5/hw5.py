@@ -7,6 +7,7 @@
 #                           # Creates one unique row, the rest are aliases!
 
 import cs112_s19_week5_linter
+import copy
 
 #####################################
 # COLLABORATIVE Non-Animation Problems
@@ -14,14 +15,34 @@ import cs112_s19_week5_linter
 #####################################
 
 def nondestructiveRemoveRowAndCol(lst, row, col):
-
-    return [42]
-
+    lstcopy = copy.deepcopy(lst)
+    for i in range(len(lst)):
+        lstcopy[i].pop(col)
+    lstcopy.pop(row)
+    return lstcopy
+ 
 def destructiveRemoveRowAndCol(lst, row, col):    
-    return None    
+    for i in range(len(lst)):
+        lst[i].pop(col)
+    lst.pop(row)
+    return lst 
 
 def bestQuiz(a):
-    return 42
+    
+    # resolve ties in favor of the lower quiz number.
+    avg = 0
+    for i in range(len(a[0])):
+        sum_col = 0
+        count = 0
+        for j in range(len(a)):
+            if a[j][i]!=-1:
+                sum_col+=(a[j][i])
+                count+=1
+        if ((sum_col/count)>avg):
+            avg = sum_col/count
+            index = i
+            
+    return index
 
 #####################################
 # Solo Non-Animation Problems
@@ -112,13 +133,36 @@ def runSudoku(width=300, height=300):
 #################################################
 
 def testNondestructiveRemoveRowAndCol():
-    print("Write your own tests for nondestructiveRemoveRowAndCol!")
+    print("Testing testNondestructiveRemoveRowAndCol()...", end="")
+    lst = [ [ 2, 3, 4, 5],
+        [ 8, 7, 6, 5],
+        [ 0, 1, 2, 3] ]
+    lstCopy = copy.deepcopy(lst)
+    result = [ [ 2, 3, 5],
+            [ 0, 1, 3] ]
+    assert(nondestructiveRemoveRowAndCol(lst, 1, 2) == result)
+    assert(lst == lstCopy), "input list should not be changed"
+    print("Passed!")
 
 def testDestructiveRemoveRowAndCol():
-    print("Write your own tests for destructiveRemoveRowAndCol!")
+    print("Testing testDestructiveRemoveRowAndCol()...", end="")
+    # The input list and output list
+    lst = [ [ 2, 3, 4, 5],
+            [ 8, 7, 6, 5],
+            [ 0, 1, 2, 3] ]
+    result = [ [ 2, 3, 5],
+            [ 0, 1, 3] ]
+    # The first test is an ordinary test; the second is a destructive test
+    assert(destructiveRemoveRowAndCol(lst, 1, 2) == result)
+    assert(lst == result), "input list should be changed"
+    print("Passed!")
 
 def testBestQuiz():
-    print("Write your own tests for bestQuiz!")
+    print("Testing testDestructiveRemoveRowAndCol()...", end="")
+    a = [[ 88,  80, 91 ],
+         [ 68, 100, -1 ]]
+    assert(bestQuiz(a) == 2)
+    print("Passed!")
 
 def testAreLegalValues():
     print("Write your own tests for areLegalValues!")
@@ -147,12 +191,12 @@ def testAll():
     testNondestructiveRemoveRowAndCol()
     testDestructiveRemoveRowAndCol()
     testBestQuiz()
-    testAreLegalValues()
-    testIsLegalRow()
-    testIsLegalCol()
-    testIsLegalBlock()
-    testIsLegalSudoku()
-    testSudokuAnimation()
+    # testAreLegalValues()
+    # testIsLegalRow()
+    # testIsLegalCol()
+    # testIsLegalBlock()
+    # testIsLegalSudoku()
+    # testSudokuAnimation()
 
 def main():
     cs112_s19_week5_linter.lint() # check rules
