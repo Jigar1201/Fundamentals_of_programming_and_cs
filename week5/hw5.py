@@ -103,24 +103,107 @@ from tkinter import *
 #### Sudoku Animation ####
 
 def init(data):
-    pass
+    data.highlighted_row = 0
+    data.highlighted_col = 0
+    data.valuePresent = False
+    data.board = [[ 5, 3, 0, 0, 7, 0, 0, 0, 0 ],
+            [ 6, 0, 0, 1, 9, 5, 0, 0, 0 ],
+            [ 0, 9, 8, 0, 0, 0, 0, 6, 0 ],
+            [ 8, 0, 0, 0, 6, 0, 0, 0, 3 ],
+            [ 4, 0, 0, 8, 0, 3, 0, 0, 1 ],
+            [ 7, 0, 0, 0, 2, 0, 0, 0, 6 ],
+            [ 0, 6, 0, 0, 0, 0, 2, 8, 0 ],
+            [ 0, 0, 0, 4, 1, 9, 0, 0, 5 ],
+            [ 0, 0, 0, 0, 8, 0, 0, 7, 9 ]]
+    data.margin = 20
+    data.rect_dim = (data.width - 2*data.margin)/len(data.board)
+    
 
 def mousePressed(event, data):
     pass
 
 def keyPressed(event, data):
+    if (event.keysym == "Left"):
+        data.highlighted_row-=1
+    elif (event.keysym == "Right"):
+        data.highlighted_row+=1
+    elif (event.keysym == "Up"):
+        data.highlighted_col-=1
+    elif (event.keysym == "Down"):
+        data.highlighted_col+=1
+    elif ((event.keysym).isnumeric() and int(event.keysym)!=0):
+        data.valuePresent = True
+        data.value = event.keysym
+
+def drawBoard(canvas, data):
     pass
 
 def redrawAll(canvas, data):
-    pass
+    starterBoard(canvas, data)
+    update_new_values(canvas, data)
+
+def update_new_values(canvas, data):
+    # Creating small rectangles
+    if data.valuePresent:
+        data.board[data.highlighted_row][data.highlighted_col] = int(data.value)
+        print(data.valuePresent)
+        data.valuePresent = False
+    print(data.board)
+    for i in range(len(data.board)):
+        for j in range(len(data.board[0])):  
+            if(data.default_values[i][j] == 0 and data.board[i][j]!=0):
+                print("came")
+                center_x = i*data.rect_dim+data.margin+data.rect_dim/2
+                center_y = j*data.rect_dim+data.rect_dim/2+data.margin
+                canvas.create_text(center_x, center_y, font=("Purisa", 25), text=data.board[i][j], width=40)
+
+def starterBoard(canvas, data):
+    board = data.board
+    rect_dim = data.rect_dim
+    margin = data.margin
+    
+    # Flag for values present by default
+    default_values = []
+    for i in range(len(board)):
+        row =[]
+        for j in range(len(board[0])):
+            if board[i][j] == 0:
+                row.append(0)
+            else:
+                row.append(1)
+        default_values.append(row)
+    data.default_values = default_values
+    
+    colors = ["red","orange","yellow","green","blue","purple","gray","brown","tan"]
+    N = int(math.sqrt(len(board)))
+    # Colours and thick lines for blocks
+    for i in range(N):
+        for j in range(N):
+            canvas.create_rectangle(i*N*rect_dim+margin, j*N*rect_dim+margin, (i+1)*N*rect_dim+margin, (j+1)*N*rect_dim+margin,fill=colors[(N*i+j)%(N**2)],width=3)
+
+    data.highlighted_row %= len(board)
+    data.highlighted_col %= len(board)
+
+    # Creating small rectangles
+    for i in range(len(board)):
+        for j in range(len(board[0])):
+            canvas.create_rectangle(j*rect_dim+margin, i*rect_dim+margin, (j+1)*rect_dim+margin, (i+1)*rect_dim+margin, width=1)            
+
+            # Highlighted row and column cell
+            if(j==data.highlighted_row and i == data.highlighted_col):
+                canvas.create_rectangle(j*rect_dim+margin, i*rect_dim+margin, (j+1)*rect_dim+margin, (i+1)*rect_dim+margin,fill = "white" ,width=1)
+            
+            # Fill default values
+            if(default_values[i][j]==1):
+                canvas.create_text(j*rect_dim+margin+rect_dim/2, i*rect_dim+rect_dim/2+margin, font=("Purisa", 25), text=board[i][j],width=50)
+    
 
 def runSudoku(width=300, height=300):
     def redrawAllWrapper(canvas, data):
         canvas.delete(ALL)
-        canvas.create_rectangle(0, 0, data.width, data.height,
-                                fill='white', width=0)
+        canvas.create_rectangle(0, 0, data.width, data.height,fill='white', width=0)
         redrawAll(canvas, data)
-        canvas.update()    
+        canvas.update()
 
     def mousePressedWrapper(event, canvas, data):
         mousePressed(event, data)
