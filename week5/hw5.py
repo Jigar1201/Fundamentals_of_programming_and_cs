@@ -101,6 +101,9 @@ def isLegalSudoku(board):
 from tkinter import *
 
 #### Sudoku Animation ####
+# TODO : Implement mouse presses 
+# TODO : Backspace to remove character
+# TODO : Game Won - Message and Ignore other keys after that
 
 def init(data):
     data.highlighted_row = 0
@@ -118,7 +121,9 @@ def init(data):
     data.margin = 20
     data.rect_dim = (data.width - 2*data.margin)/len(data.board)
     
-
+    # Flag for values present by default
+    data.default_values = [[(1 if data.board[j][i]!=0 else 0)  for i in range(len(data.board))] for j in range(len(data.board))]
+    
 def mousePressed(event, data):
     pass
 
@@ -135,44 +140,35 @@ def keyPressed(event, data):
         data.valuePresent = True
         data.value = event.keysym
 
-def drawBoard(canvas, data):
-    pass
-
 def redrawAll(canvas, data):
     starterBoard(canvas, data)
     update_new_values(canvas, data)
 
 def update_new_values(canvas, data):
-    # Creating small rectangles
     if data.valuePresent:
-        data.board[data.highlighted_row][data.highlighted_col] = int(data.value)
-        print(data.valuePresent)
+        temp_board = copy.deepcopy(data.board)
+        temp_board[data.highlighted_col][data.highlighted_row] = int(data.value)
+        if (isLegalSudoku(temp_board) and data.default_values[data.highlighted_col][data.highlighted_row]==0):
+            data.board[data.highlighted_col][data.highlighted_row] = int(data.value)
+            
+            # Creating a white rectangle
+            px1 = data.highlighted_row*data.rect_dim+data.margin
+            px2 = data.highlighted_col*data.rect_dim+data.margin
+            py1 = (data.highlighted_row+1)*data.rect_dim+data.margin
+            py2 = (data.highlighted_col+1)*data.rect_dim+data.margin
+            canvas.create_rectangle(px1, px2, py1, py2,fill = "white" ,width=1)
+            
+            # Inputing a text in blue
+            center_x = data.highlighted_row*data.rect_dim+data.margin+data.rect_dim/2
+            center_y = data.highlighted_col*data.rect_dim+data.rect_dim/2+data.margin
+            canvas.create_text(center_x, center_y, font=("Purisa", 25),fill = "dark turquoise",text=data.value, width=40)
+            
         data.valuePresent = False
-    print(data.board)
-    for i in range(len(data.board)):
-        for j in range(len(data.board[0])):  
-            if(data.default_values[i][j] == 0 and data.board[i][j]!=0):
-                print("came")
-                center_x = i*data.rect_dim+data.margin+data.rect_dim/2
-                center_y = j*data.rect_dim+data.rect_dim/2+data.margin
-                canvas.create_text(center_x, center_y, font=("Purisa", 25), text=data.board[i][j], width=40)
 
 def starterBoard(canvas, data):
     board = data.board
     rect_dim = data.rect_dim
     margin = data.margin
-    
-    # Flag for values present by default
-    default_values = []
-    for i in range(len(board)):
-        row =[]
-        for j in range(len(board[0])):
-            if board[i][j] == 0:
-                row.append(0)
-            else:
-                row.append(1)
-        default_values.append(row)
-    data.default_values = default_values
     
     colors = ["red","orange","yellow","green","blue","purple","gray","brown","tan"]
     N = int(math.sqrt(len(board)))
@@ -192,11 +188,12 @@ def starterBoard(canvas, data):
             # Highlighted row and column cell
             if(j==data.highlighted_row and i == data.highlighted_col):
                 canvas.create_rectangle(j*rect_dim+margin, i*rect_dim+margin, (j+1)*rect_dim+margin, (i+1)*rect_dim+margin,fill = "white" ,width=1)
-            
             # Fill default values
-            if(default_values[i][j]==1):
+            if(data.default_values[i][j]==1):
                 canvas.create_text(j*rect_dim+margin+rect_dim/2, i*rect_dim+rect_dim/2+margin, font=("Purisa", 25), text=board[i][j],width=50)
-    
+            
+            elif(data.board[i][j]!=0):
+                canvas.create_text(j*rect_dim+margin+rect_dim/2, i*rect_dim+rect_dim/2+margin, font=("Purisa", 25), fill = "dark turquoise", text=board[i][j],width=50)
 
 def runSudoku(width=300, height=300):
     def redrawAllWrapper(canvas, data):
