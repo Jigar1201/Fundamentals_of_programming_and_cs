@@ -101,14 +101,15 @@ def isLegalSudoku(board):
 from tkinter import *
 
 #### Sudoku Animation ####
-# TODO : Implement mouse presses 
-# TODO : Backspace to remove character
 # TODO : Game Won - Message and Ignore other keys after that
 
 def init(data):
     data.highlighted_row = 0
     data.highlighted_col = 0
     data.valuePresent = False
+    data.erase_current = False
+    data.game_won = False
+
     data.board = [[ 5, 3, 0, 0, 7, 0, 0, 0, 0 ],
             [ 6, 0, 0, 1, 9, 5, 0, 0, 0 ],
             [ 0, 9, 8, 0, 0, 0, 0, 6, 0 ],
@@ -118,14 +119,30 @@ def init(data):
             [ 0, 6, 0, 0, 0, 0, 2, 8, 0 ],
             [ 0, 0, 0, 4, 1, 9, 0, 0, 5 ],
             [ 0, 0, 0, 0, 8, 0, 0, 7, 9 ]]
+    
+    # Board to check game won
+    # data.board = [[3, 1, 6, 5, 7, 8, 4, 9, 2],
+    #         [ 5, 2, 9, 1, 3, 4, 7, 6, 8 ],
+    #         [ 4, 8, 7, 6, 2, 9, 5, 3, 1 ],
+    #         [ 2, 6, 3, 4, 1, 5, 9, 8, 7 ],
+    #         [ 9, 7, 4, 8, 6, 3, 1, 2, 5 ],
+    #         [ 8, 5, 1, 7, 9, 2, 6, 4, 3 ],
+    #         [ 1, 3, 8, 9, 4, 7, 2, 5, 6 ],
+    #         [ 6, 9, 2, 3, 5, 1, 8, 7, 4 ],
+    #         [ 7, 4, 5, 2, 8, 6, 3, 1, 0 ]]
+
     data.margin = 20
     data.rect_dim = (data.width - 2*data.margin)/len(data.board)
     
     # Flag for values present by default
     data.default_values = [[(1 if data.board[j][i]!=0 else 0)  for i in range(len(data.board))] for j in range(len(data.board))]
+
     
 def mousePressed(event, data):
-    pass
+    X = (event.x - data.margin)//data.rect_dim
+    Y = (event.y - data.margin)//data.rect_dim
+    data.highlighted_row = int(X)
+    data.highlighted_col = int(Y)
 
 def keyPressed(event, data):
     if (event.keysym == "Left"):
@@ -139,15 +156,22 @@ def keyPressed(event, data):
     elif ((event.keysym).isnumeric() and int(event.keysym)!=0):
         data.valuePresent = True
         data.value = event.keysym
+    elif  ((event.keysym) == "BackSpace"):
+        data.erase_current = True
 
 def redrawAll(canvas, data):
     starterBoard(canvas, data)
     update_new_values(canvas, data)
 
 def update_new_values(canvas, data):
-    if data.valuePresent:
+    if data.valuePresent and not data.game_won:
         temp_board = copy.deepcopy(data.board)
         temp_board[data.highlighted_col][data.highlighted_row] = int(data.value)
+        if(sum([(0 if 0 in j else 1)for j in temp_board]) == len(data.board)):
+            print("Game Won")
+            canvas.create_text(data.height/2, data.width/2, font=("Purisa", 25),fill = "WHITE", text="GAME WON!!", width=40000)
+            data.game_won = True
+
         if (isLegalSudoku(temp_board) and data.default_values[data.highlighted_col][data.highlighted_row]==0):
             data.board[data.highlighted_col][data.highlighted_row] = int(data.value)
             
@@ -164,6 +188,18 @@ def update_new_values(canvas, data):
             canvas.create_text(center_x, center_y, font=("Purisa", 25),fill = "dark turquoise",text=data.value, width=40)
             
         data.valuePresent = False
+    
+    if data.erase_current and not data.game_won:
+        data.board[data.highlighted_col][data.highlighted_row] = 0
+        data.erase_current = False
+
+        # Creating a white rectangle
+        px1 = data.highlighted_row*data.rect_dim+data.margin
+        px2 = data.highlighted_col*data.rect_dim+data.margin
+        py1 = (data.highlighted_row+1)*data.rect_dim+data.margin
+        py2 = (data.highlighted_col+1)*data.rect_dim+data.margin
+        canvas.create_rectangle(px1, px2, py1, py2,fill = "white" ,width=1)
+
 
 def starterBoard(canvas, data):
     board = data.board
@@ -172,33 +208,35 @@ def starterBoard(canvas, data):
     
     colors = ["red","orange","yellow","green","blue","purple","gray","brown","tan"]
     N = int(math.sqrt(len(board)))
-    # Colours and thick lines for blocks
-    for i in range(N):
-        for j in range(N):
-            canvas.create_rectangle(i*N*rect_dim+margin, j*N*rect_dim+margin, (i+1)*N*rect_dim+margin, (j+1)*N*rect_dim+margin,fill=colors[(N*i+j)%(N**2)],width=3)
+    
+    if not data.game_won:
+        canvas.delete(ALL)
+        canvas.create_rectangle(0, 0, data.width, data.height,fill='white', width=0)
+        # Colours and thick lines for blocks
+        for i in range(N):
+            for j in range(N):
+                canvas.create_rectangle(i*N*rect_dim+margin, j*N*rect_dim+margin, (i+1)*N*rect_dim+margin, (j+1)*N*rect_dim+margin,fill=colors[(N*i+j)%(N**2)],width=3)
 
-    data.highlighted_row %= len(board)
-    data.highlighted_col %= len(board)
+        data.highlighted_row %= len(board)
+        data.highlighted_col %= len(board)
+    
+        # Creating small rectangles
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                canvas.create_rectangle(j*rect_dim+margin, i*rect_dim+margin, (j+1)*rect_dim+margin, (i+1)*rect_dim+margin, width=1)            
 
-    # Creating small rectangles
-    for i in range(len(board)):
-        for j in range(len(board[0])):
-            canvas.create_rectangle(j*rect_dim+margin, i*rect_dim+margin, (j+1)*rect_dim+margin, (i+1)*rect_dim+margin, width=1)            
-
-            # Highlighted row and column cell
-            if(j==data.highlighted_row and i == data.highlighted_col):
-                canvas.create_rectangle(j*rect_dim+margin, i*rect_dim+margin, (j+1)*rect_dim+margin, (i+1)*rect_dim+margin,fill = "white" ,width=1)
-            # Fill default values
-            if(data.default_values[i][j]==1):
-                canvas.create_text(j*rect_dim+margin+rect_dim/2, i*rect_dim+rect_dim/2+margin, font=("Purisa", 25), text=board[i][j],width=50)
-            
-            elif(data.board[i][j]!=0):
-                canvas.create_text(j*rect_dim+margin+rect_dim/2, i*rect_dim+rect_dim/2+margin, font=("Purisa", 25), fill = "dark turquoise", text=board[i][j],width=50)
+                # Highlighted row and column cell
+                if j==data.highlighted_row and i == data.highlighted_col:
+                    canvas.create_rectangle(j*rect_dim+margin, i*rect_dim+margin, (j+1)*rect_dim+margin, (i+1)*rect_dim+margin,fill = "white" ,width=1)
+                # Fill default values
+                if(data.default_values[i][j]==1):
+                    canvas.create_text(j*rect_dim+margin+rect_dim/2, i*rect_dim+rect_dim/2+margin, font=("Purisa", 25), text=board[i][j],width=50)
+                
+                elif(data.board[i][j]!=0):
+                    canvas.create_text(j*rect_dim+margin+rect_dim/2, i*rect_dim+rect_dim/2+margin, font=("Purisa", 25), fill = "dark turquoise", text=board[i][j],width=50)
 
 def runSudoku(width=300, height=300):
     def redrawAllWrapper(canvas, data):
-        canvas.delete(ALL)
-        canvas.create_rectangle(0, 0, data.width, data.height,fill='white', width=0)
         redrawAll(canvas, data)
         canvas.update()
 
