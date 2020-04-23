@@ -1,4 +1,5 @@
 # https://www.cs.cmu.edu/~112/notes/notes-tetris/2_1_DesignOverview.html
+# ONLY DONE TILL STEP 6
 
 from tkinter import *   
 import random
@@ -13,7 +14,8 @@ def fallingPieceIsLegal(app):
                     return False
     return True
 
-def removeFullRows():
+def removeFullRows(app):
+    tempBoard = []
     pass
 
 def rotateFallingPiece(app):
