@@ -267,34 +267,29 @@ def generateCharacterString(string):
 
 def testPowersOf3ToN():
     print("Testing Powers of 3 to N...", end="")
-    # print("Printing 1",(powersOf3ToN(1)))
-    # print("Printing 2",(powersOf3ToN(2)))
-    # print("Printing 3",(powersOf3ToN(3)))
-    # print("Printing 4",(powersOf3ToN(4)))
-    # print("Printing 5",(powersOf3ToN(5)))
-    # print("Printing 6",(powersOf3ToN(6)))
-    # print("Printing 10",(powersOf3ToN(10)))
-    # print("Printing 15",(powersOf3ToN(15)))
-    # print("Printing 33",(powersOf3ToN(33)))
-    # assert(powersOf3ToN(2) == [1])
-    # assert(powersOf3ToN(6) == [1,3])
-    # assert(powersOf3ToN(10) == [1,3,9])
-    # assert(powersOf3ToN(11) == [1,3,9])
-    # assert(powersOf3ToN(29) == [1,3,9,27])
+    print("Printing 1",(powersOf3ToN(1)))
+    print("Printing 2",(powersOf3ToN(2)))
+    print("Printing 3",(powersOf3ToN(3)))
+    print("Printing 4",(powersOf3ToN(4)))
+    print("Printing 5",(powersOf3ToN(5)))
+    print("Printing 6",(powersOf3ToN(6)))
+    print("Printing 10",(powersOf3ToN(10)))
+    print("Printing 15",(powersOf3ToN(15)))
+    print("Printing 33",(powersOf3ToN(33)))
+    assert(powersOf3ToN(2) == [1])
+    assert(powersOf3ToN(6) == [1,3])
+    assert(powersOf3ToN(10) == [1,3,9])
+    assert(powersOf3ToN(11) == [1,3,9])
+    assert(powersOf3ToN(29) == [1,3,9,27])
     print("Passed!")
 
 def powersOf3ToN(n):
-    # TODO : CHECKING FOR 10 
-    # Takes a possibly-negative float or int n, and returns a list of the positive powers of 3 up to
-    # and including n. As an example, powersOf3ToN(10.5) returns [1, 3, 9]. 
-    # If no such powers of 3 exist, you should return the empty list.
     if(n<1):
         return []
     elif (n==1) or (n==2):
         return [1]
     else:
-        # return sorted(powersOf3ToN(n//3) + [3*powersOf3ToN(n//3)[0]])
-        return [1] + [powersOf3ToN(n//3)[0]*3]
+        return powersOf3ToN(n//3) + [powersOf3ToN(n//3)[-1]*3]
 
 class Polynomial(object):
     def __init__(self, coeffs):
@@ -563,7 +558,7 @@ def testAll():
     testVendingMachineClass()
     testBirdClasses()
     testGenerateCharacterString()
-    # testPowersOf3ToN()
+    testPowersOf3ToN()
     testEquationClasses()
 
 def main():
